@@ -9,3 +9,7 @@ h1 { margin: 0; font-size: 22px; }
 .row.sev2 .sev { color: #a15c00; }
 .row time { color: #555; font-variant-numeric: tabular-nums; }
 footer { color: #777; font-size: 13px; }
+.loader, .empty { color: #666; margin: 12px 0; }
+.row button { font: inherit; padding: 4px 14px; border: 1px solid #1d1d1f; border-radius: 6px; background: #fff; cursor: pointer; }
+.row button:disabled { opacity: 0.5; cursor: default; }
+.row .acked { color: #0a7d32; font-weight: 600; padding: 4px 14px; }
