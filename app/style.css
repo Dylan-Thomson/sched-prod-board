@@ -13,3 +13,5 @@ footer { color: #777; font-size: 13px; }
 .row button { font: inherit; padding: 4px 14px; border: 1px solid #1d1d1f; border-radius: 6px; background: #fff; cursor: pointer; }
 .row button:disabled { opacity: 0.5; cursor: default; }
 .row .acked { color: #0a7d32; font-weight: 600; padding: 4px 14px; }
+.new-bar { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 5; font: inherit; font-weight: 600; padding: 8px 18px; border: 0; border-radius: 999px; background: #1d1d1f; color: #fff; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+.new-bar[hidden] { display: none; }

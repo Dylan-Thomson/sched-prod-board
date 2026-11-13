@@ -6,6 +6,9 @@ const REFRESH_MS = 2000;
 const list = document.querySelector('[data-testid="incident-list"]');
 const loader = document.querySelector('[data-testid="loader"]');
 const empty = document.querySelector('[data-testid="empty"]');
+const newBar = document.querySelector('[data-testid="new-bar"]');
+
+let pending = [];
 
 function span(className, text) {
   const el = document.createElement('span');
@@ -58,13 +61,33 @@ function row(incident) {
   return li;
 }
 
-function render(incidents) {
-  const shown = new Set([...list.children].map((li) => li.dataset.id));
-  const fresh = incidents.filter((incident) => !shown.has(incident.id));
-  list.prepend(...fresh.map(row));
-  loader.remove();
+function showRows(incidents) {
+  list.prepend(...incidents.map(row));
   empty.hidden = list.children.length > 0;
 }
+
+function showNewBar() {
+  newBar.hidden = pending.length === 0;
+  newBar.textContent = `${pending.length} new incident${pending.length === 1 ? '' : 's'} · show`;
+}
+
+function render(incidents) {
+  const known = new Set([...list.children].map((li) => li.dataset.id).concat(pending.map((i) => i.id)));
+  const fresh = incidents.filter((incident) => !known.has(incident.id));
+  loader.remove();
+  if (list.children.length === 0) {
+    showRows(fresh);
+    return;
+  }
+  pending = [...fresh, ...pending];
+  showNewBar();
+}
+
+newBar.addEventListener('click', () => {
+  showRows(pending);
+  pending = [];
+  showNewBar();
+});
 
 async function refresh() {
   try {

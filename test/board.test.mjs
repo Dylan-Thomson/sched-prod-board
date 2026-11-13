@@ -37,17 +37,43 @@ test('footer sha matches the build meta', async () => {
   await context.close();
 });
 
-test('a new incident appears at the top without a reload', async () => {
+test('new incidents wait behind an "N new" bar; the list holds still', async () => {
   const { context, page } = await open();
   const rows = page.locator('[data-testid="incident-row"]');
   await rows.first().waitFor();
   const firstId = await rows.first().getAttribute('data-id');
-  await page.waitForFunction(
-    (id) => document.querySelector('[data-testid="incident-row"]').dataset.id !== id,
-    firstId,
-    { timeout: 30_000 },
-  );
+  const before = await rows.nth(2).boundingBox();
+  const count = await rows.count();
+  await page.getByTestId('new-bar').waitFor({ state: 'visible', timeout: 30_000 });
+  assert.match(await page.getByTestId('new-bar').innerText(), /^\d+ new/);
+  assert.equal(await rows.first().getAttribute('data-id'), firstId);
+  assert.equal(await rows.count(), count);
+  assert.deepEqual(await rows.nth(2).boundingBox(), before);
+  await context.close();
+});
+
+test('clicking the bar brings new incidents in at the top', async () => {
+  const { context, page } = await open();
+  const rows = page.locator('[data-testid="incident-row"]');
+  await rows.first().waitFor();
+  const firstId = await rows.first().getAttribute('data-id');
+  await page.getByTestId('new-bar').click({ timeout: 30_000 });
   assert.notEqual(await rows.first().getAttribute('data-id'), firstId);
+  assert.equal(await page.getByTestId('new-bar').isVisible(), false);
+  assert.equal(await rows.first().getByTestId('ack').count(), 1);
+  await context.close();
+});
+
+test('an empty feed shows the empty state, not the loader', async () => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.route('**/incidents?**', async (route) => {
+    const res = await route.fetch();
+    await route.fulfill({ response: res, json: { ...(await res.json()), incidents: [] } });
+  });
+  await page.goto(BOARD);
+  await page.getByTestId('empty').waitFor({ state: 'visible' });
+  assert.equal(await page.getByTestId('loader').isVisible().catch(() => false), false);
   await context.close();
 });
 
